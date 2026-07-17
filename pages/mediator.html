@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrón de Diseño Mediator</title>
+  <meta name="description" content="Guía del patrón Mediator: problema, solución, código PHP, cuándo aplicarlo y ejemplos reales como Redux y diálogos de UI." />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <nav class="page-nav">
+    <a href="../index.html">← Inicio</a>
+    <a href="memento.html">Ver Memento →</a>
+  </nav>
+
+  <header>
+    <div class="header-label">Patrón de Diseño</div>
+    <h1>Mediator</h1>
+    <p class="header-subtitle">Centraliza la comunicación para desacoplar componentes</p>
+    <div class="accent-line"></div>
+  </header>
+
+  <aside class="video-banner" id="video">
+    <div class="video-banner-label">Video (3–5 min)</div>
+    <p>
+      Explicación del patrón Mediator siguiendo la misma plantilla de esta página.
+      <a class="video-link is-pending" href="#" id="mediator-video-link">Video pendiente — reemplazar con YouTube unlisted u OneDrive</a>
+    </p>
+  </aside>
+
+  <main class="grid">
+
+    <section class="card card-1" id="problema">
+      <div class="card-number">01 El Problema</div>
+      <h2>Cuando todos hablan con <span class="highlight">todos</span></h2>
+
+      <p>
+        Imagina un chat de soporte: cada usuario (Ana, Luis, Marta) necesita avisarle
+        a los demás cuando escribe. Sin un centro, Ana conoce a Luis y a Marta; Luis
+        conoce a Ana y a Marta; Marta conoce a los dos. Con cuatro usuarios son seis
+        enlaces; con diez, cuarenta y cinco. El grafo crece en O(n²).
+      </p>
+      <p>
+        Lo mismo pasa en una UI: un botón “Enviar”, un input y una lista de errores
+        se llaman entre sí. Cambias un componente y rompes tres. El dolor no es
+        “falta un patrón”: es el acoplamiento que hace imposible tocar una pieza
+        sin reescribir el resto.
+      </p>
+
+      <div class="problem-highlight">
+        "Necesitas que los objetos colaboren <strong>sin conocerse entre sí</strong>
+        — solo hablando con un intermediario."
+      </div>
+    </section>
+
+    <section class="card card-2" id="solucion">
+      <div class="card-number">02 La Solución</div>
+      <h2>Un hub, muchos <span class="highlight">colegas</span></h2>
+
+      <p>
+        Mediator introduce un objeto central que orquesta la comunicación. Los
+        <em>colleagues</em> solo conocen al mediador; el mediador conoce a los
+        colleagues y decide a quién reenviar cada mensaje.
+      </p>
+
+      <ul class="roles-list">
+        <li>
+          <span class="role-tag role-mediator">Mediator</span>
+          Define la interfaz de comunicación (p. ej. <code>notify</code> / <code>send</code>).
+          El ConcreteMediator implementa la lógica: quién recibe qué.
+        </li>
+        <li>
+          <span class="role-tag role-colleague">Colleague</span>
+          Cada participante (usuario del chat, botón, panel). Guarda una referencia
+          al mediador y le delega todo contacto con el resto.
+        </li>
+      </ul>
+
+      <div class="diagram-block">
+        <pre>
+ ColleagueA   ColleagueB   ColleagueC
+     |             |             |
+     +------+------+------+------+
+                   |
+              Mediator
+           (ConcreteMediator)
+                   |
+         orquesta send / notify</pre>
+      </div>
+    </section>
+
+    <section class="card card-3" id="codigo">
+      <div class="card-number">03 Código Mínimo</div>
+      <h2>Implementación en <span class="highlight">PHP</span></h2>
+
+      <div class="code-label code-label-bad">Código Incorrecto — Acoplamiento N×N</div>
+      <div class="code-block code-bad">
+        <pre><span class="kw">class</span> <span class="fn">User</span> {
+  <span class="pm">public</span> <span class="ty">array</span> <span class="str">$peers</span> = [];
+
+  <span class="kw">public function</span> <span class="fn">send</span>(<span class="ty">string</span> <span class="str">$msg</span>): <span class="ty">void</span> {
+    <span class="kw">foreach</span> (<span class="str">$this</span>-><span class="str">peers</span> <span class="kw">as</span> <span class="str">$peer</span>) {
+      <span class="str">$peer</span>-><span class="fn">receive</span>(<span class="str">$msg</span>); <span class="cm">// cada uno conoce a todos</span>
+    }
+  }
+}</pre>
+      </div>
+
+      <div class="code-label code-label-good">&#10003; Código Correcto — Solo conocen al mediador</div>
+      <div class="code-block code-good">
+        <pre><span class="kw">class</span> <span class="fn">ChatMediator</span> {
+  <span class="pm">private</span> <span class="ty">array</span> <span class="str">$users</span> = [];
+
+  <span class="kw">public function</span> <span class="fn">join</span>(<span class="fn">User</span> <span class="str">$u</span>): <span class="ty">void</span> {
+    <span class="str">$this</span>-><span class="str">users</span>[] = <span class="str">$u</span>;
+  }
+  <span class="kw">public function</span> <span class="fn">send</span>(<span class="ty">string</span> <span class="str">$msg</span>, <span class="fn">User</span> <span class="str">$from</span>): <span class="ty">void</span> {
+    <span class="kw">foreach</span> (<span class="str">$this</span>-><span class="str">users</span> <span class="kw">as</span> <span class="str">$u</span>) {
+      <span class="kw">if</span> (<span class="str">$u</span> !== <span class="str">$from</span>) <span class="str">$u</span>-><span class="fn">receive</span>(<span class="str">$msg</span>);
+    }
+  }
+}
+
+<span class="kw">class</span> <span class="fn">User</span> {
+  <span class="kw">public function</span> <span class="fn">__construct</span>(
+    <span class="pm">private</span> <span class="ty">string</span> <span class="str">$name</span>,
+    <span class="pm">private</span> <span class="fn">ChatMediator</span> <span class="str">$room</span>
+  ) { <span class="str">$room</span>-><span class="fn">join</span>(<span class="str">$this</span>); }
+
+  <span class="kw">public function</span> <span class="fn">send</span>(<span class="ty">string</span> <span class="str">$msg</span>): <span class="ty">void</span> {
+    <span class="str">$this</span>-><span class="str">room</span>-><span class="fn">send</span>(<span class="str">$msg</span>, <span class="str">$this</span>);
+  }
+  <span class="kw">public function</span> <span class="fn">receive</span>(<span class="ty">string</span> <span class="str">$msg</span>): <span class="ty">void</span> {
+    <span class="fn">echo</span> <span class="str">"$this->name: $msg\n"</span>;
+  }
+}</pre>
+      </div>
+    </section>
+
+    <section class="card card-4" id="cuando">
+      <div class="card-number">04 Cuándo Aplicarlo</div>
+      <h2>Úsalo bien o <span class="highlight">evítalo</span></h2>
+
+      <div class="when-grid">
+        <div class="when-col when-yes">
+          <div class="when-col-header">
+            <span class="icon-check">✔</span> Sí aplica
+          </div>
+          <ul>
+            <li>Muchos objetos interactúan y el grafo de llamadas se vuelve ilegible.</li>
+            <li>Quieres desacoplar colleagues: agregar uno no debe tocar a los demás.</li>
+            <li>Hay un “hub” natural: chat, wizard de formularios, torre de control de UI.</li>
+          </ul>
+        </div>
+
+        <div class="when-col when-no">
+          <div class="when-col-header">
+            <span class="icon-x">✘</span> No aplica
+          </div>
+          <ul>
+            <li>Solo hay 2–3 objetos: una llamada directa es más clara.</li>
+            <li>El mediador se hincha y se vuelve un “dios” monolítico.</li>
+            <li>Un Event Bus / pub-sub genérico ya cubre el caso sin el patrón formal.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card card-5" id="ejemplos">
+      <div class="card-number">05 Ejemplos Reales</div>
+      <h2>Mediator en el <span class="highlight">mundo real</span> (verificables)</h2>
+
+      <div class="examples-grid">
+
+        <div class="example-card">
+          <span class="example-icon">⚛</span>
+          <h3>Redux / Flux — store como mediador</h3>
+          <p>
+            En Flux y Redux, los componentes de UI no se llaman entre sí. Despachan
+            acciones hacia un store central; el store actualiza el estado y notifica
+            a quienes escuchan. El store actúa como mediador: los “colleagues” (views)
+            solo conocen el hub, no a las demás views.
+          </p>
+          <p>
+            Documentación oficial: arquitectura Flux (facebook.github.io/flux) y
+            Redux (redux.js.org) — el flujo unidireccional es el mismo principio.
+          </p>
+          <span class="example-tag">Arquitectura verificable</span>
+        </div>
+
+        <div class="example-card">
+          <span class="example-icon">🗔</span>
+          <h3>Diálogos de UI — botones desacoplados</h3>
+          <p>
+            El ejemplo clásico del GoF: en un diálogo, OK y Cancel no se conocen.
+            El diálogo (mediador) escucha sus eventos y decide cerrar, validar o
+            actualizar otros controles. Aparece en toolkits GUI (Swing, Qt, WPF):
+            el contenedor orquesta; los widgets solo notifican.
+          </p>
+          <p>
+            Referencia: <em>Design Patterns</em> (Gamma et al.), capítulo Mediator —
+            el caso del dialog box es el escenario original del patrón.
+          </p>
+          <span class="example-tag">Ejemplo GoF clásico</span>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Patrones de Diseño  <span>Mediator</span>  G4 · ESEN  2026</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
