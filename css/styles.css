@@ -1,0 +1,552 @@
+/* ============================
+   MEMENTO — Design Pattern Page
+   Palette: Navy, Beige, Red, Black
+   ============================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy:        #0d1b3e;
+  --navy-mid:    #162550;
+  --navy-light:  #1e3269;
+  --beige:       #f5efe6;
+  --beige-dark:  #e8dcc8;
+  --beige-mid:   #d4c4a8;
+  --red:         #c0392b;
+  --red-light:   #e74c3c;
+  --red-glow:    rgba(192, 57, 43, 0.25);
+  --black:       #0a0a0a;
+  --white:       #ffffff;
+  --text-light:  #c8d4e8;
+  --text-muted:  #8a9bb8;
+
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(0,0,0,0.4);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--navy);
+  color: var(--beige);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(30, 50, 105, 0.6) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(192, 57, 43, 0.08) 0%, transparent 60%);
+}
+
+/* ─── Noise texture overlay ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* ─── Page Wrapper ─── */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+}
+
+/* ─── Header ─── */
+header {
+  text-align: center;
+  margin-bottom: 64px;
+  position: relative;
+}
+
+.header-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--red-light);
+  background: rgba(192, 57, 43, 0.12);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  padding: 6px 18px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--beige) 20%, var(--beige-mid) 60%, var(--red-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.header-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+header .accent-line {
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  margin: 24px auto 0;
+  border-radius: 2px;
+}
+
+/* ─── Main Grid (vertical stack) ─── */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Card Base ─── */
+.card {
+  background: rgba(22, 37, 80, 0.75);
+  border: 1px solid rgba(200, 212, 232, 0.1);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(245, 239, 230, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(200, 212, 232, 0.2);
+}
+
+/* ─── Card Number Badge ─── */
+.card-number {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--red-light);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-number::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(192, 57, 43, 0.3);
+  max-width: 40px;
+}
+
+/* ─── Card Titles ─── */
+.card h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--beige);
+  line-height: 1.25;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.card h2 span.highlight {
+  color: var(--red-light);
+}
+
+/* ─── Card Body Text ─── */
+.card p {
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--text-light);
+  margin-bottom: 14px;
+}
+
+.card p:last-child { margin-bottom: 0; }
+
+/* ─── Section 1 — El Problema ─── */
+.card-1 {
+  background: linear-gradient(145deg, rgba(22, 37, 80, 0.9) 0%, rgba(13, 27, 62, 0.95) 100%);
+  border-color: rgba(200, 212, 232, 0.12);
+}
+
+.problem-highlight {
+  background: rgba(192, 57, 43, 0.1);
+  border-left: 3px solid var(--red);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 18px;
+  margin-top: 18px;
+  font-size: 0.88rem;
+  color: var(--beige-dark);
+  font-style: italic;
+  line-height: 1.7;
+}
+
+/* ─── Section 2 — La Solución ─── */
+.card-2 {
+  background: linear-gradient(160deg, rgba(30, 50, 105, 0.85) 0%, rgba(13, 27, 62, 0.95) 100%);
+}
+
+.roles-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.roles-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+.role-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.role-originator { background: rgba(192, 57, 43, 0.2); color: #e88; border: 1px solid rgba(192,57,43,0.4); }
+.role-memento    { background: rgba(245, 239, 230, 0.1); color: var(--beige); border: 1px solid rgba(245,239,230,0.2); }
+.role-caretaker  { background: rgba(30, 50, 105, 0.5); color: var(--text-light); border: 1px solid rgba(200,212,232,0.25); }
+
+/* ─── Section 3 — Código Mínimo ─── */
+.card-3 {
+  background: rgba(10, 10, 10, 0.8);
+  border-color: rgba(200, 212, 232, 0.08);
+}
+
+.card-3::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), rgba(192,57,43,0));
+}
+
+.code-block {
+  background: rgba(5, 5, 5, 0.7);
+  border: 2px solid rgba(200, 212, 232, 0.08);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  overflow-x: auto;
+  margin-top: 0;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.code-block pre {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  color: var(--beige-dark);
+  white-space: pre;
+}
+
+/* ── Code label (pill above each block) ── */
+.code-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 100px 100px 0 0;
+  margin-bottom: 0;
+  margin-top: 16px;
+  border: 2px solid transparent;
+  border-bottom: none;
+}
+
+.code-label-bad {
+  background: rgba(192, 57, 43, 0.18);
+  color: #ff7b6b;
+  border-color: rgba(192, 57, 43, 0.55);
+}
+
+.code-label-good {
+  background: rgba(46, 160, 67, 0.15);
+  color: #7ec8a4;
+  border-color: rgba(46, 160, 67, 0.45);
+}
+
+/* ── Bad code block (red outline) ── */
+.code-bad {
+  border: 2px solid rgba(192, 57, 43, 0.6);
+  border-top: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+  box-shadow: 0 0 20px rgba(192, 57, 43, 0.12), inset 0 0 30px rgba(192, 57, 43, 0.04);
+  background: rgba(40, 5, 5, 0.65);
+}
+
+/* ── Good code block (green outline) ── */
+.code-good {
+  border: 2px solid rgba(46, 160, 67, 0.55);
+  border-top: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+  box-shadow: 0 0 20px rgba(46, 160, 67, 0.1), inset 0 0 30px rgba(46, 160, 67, 0.03);
+  background: rgba(5, 25, 10, 0.65);
+}
+
+/* Syntax colors */
+.kw  { color: #e06c75; }   /* keyword */
+.fn  { color: #98c379; }   /* function/class name */
+.str { color: #e5c07b; }   /* string */
+.cm  { color: #5c6370; font-style: italic; }  /* comment */
+.ty  { color: #61aeee; }   /* type */
+.pm  { color: #c678dd; }   /* param/modifier */
+
+/* ─── Section 4 — Cuándo SÍ / NO ─── */
+.card-4 {
+  background: linear-gradient(145deg, rgba(22, 37, 80, 0.88) 0%, rgba(13, 27, 62, 0.95) 100%);
+}
+
+.when-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.when-col {
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  border: 1px solid rgba(200,212,232,0.07);
+}
+
+.when-col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.when-yes .when-col-header { color: #7ec8a4; }
+.when-no  .when-col-header { color: #e06c75; }
+
+.icon-check { color: #7ec8a4; font-size: 1rem; }
+.icon-x     { color: #e06c75; font-size: 1rem; }
+
+.when-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.when-col ul li {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  line-height: 1.55;
+  padding-left: 16px;
+  position: relative;
+}
+
+.when-yes ul li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #7ec8a4;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.when-no ul li::before {
+  content: '✗';
+  position: absolute;
+  left: 0;
+  color: #e06c75;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+/* ─── Section 5 — Ejemplos Reales ─── */
+.card-5 {
+  background: linear-gradient(135deg, rgba(13,27,62,0.9) 0%, rgba(22,37,80,0.85) 50%, rgba(13,27,62,0.9) 100%);
+  border-color: rgba(200,212,232,0.12);
+}
+
+.examples-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 4px;
+}
+
+.example-card {
+  background: rgba(0,0,0,0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid rgba(200,212,232,0.08);
+  transition: border-color 0.3s ease, background 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.example-card:hover {
+  border-color: rgba(192,57,43,0.35);
+  background: rgba(0,0,0,0.35);
+}
+
+.example-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(192,57,43,0.06);
+  pointer-events: none;
+}
+
+.example-icon {
+  font-size: 2rem;
+  margin-bottom: 14px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(192,57,43,0.3));
+}
+
+.example-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--beige);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.example-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+
+.example-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(192,57,43,0.15);
+  color: var(--red-light);
+  border: 1px solid rgba(192,57,43,0.25);
+}
+
+/* ─── Diagram Block ─── */
+.diagram-block {
+  background: rgba(5,5,5,0.65);
+  border: 1px solid rgba(200,212,232,0.08);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.diagram-block pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.67rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  white-space: pre;
+}
+
+/* ─── Footer ─── */
+footer {
+  text-align: center;
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(200,212,232,0.08);
+}
+
+footer p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+footer span {
+  color: var(--red-light);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .when-grid,
+  .examples-grid {
+    grid-template-columns: 1fr;
+  }
+  header h1 { font-size: 3rem; }
+}
+
+@media (max-width: 600px) {
+  .page-wrapper { padding: 40px 16px 60px; }
+  .card { padding: 24px; }
+  header h1 { font-size: 2.5rem; }
+}
+
+/* ─── Animations ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+header         { animation: fadeUp 0.7s ease both; }
+.card-1        { animation: fadeUp 0.7s 0.1s ease both; }
+.card-2        { animation: fadeUp 0.7s 0.18s ease both; }
+.card-3        { animation: fadeUp 0.7s 0.26s ease both; }
+.card-4        { animation: fadeUp 0.7s 0.34s ease both; }
+.card-5        { animation: fadeUp 0.7s 0.42s ease both; }

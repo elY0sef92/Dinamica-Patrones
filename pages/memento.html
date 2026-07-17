@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrón de Diseño Memento</title>
+  <meta name="description" content="Guía completa del patrón de diseño Memento: problema, solución, código PHP, casos de uso y ejemplos reales como Java Swing y Git." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <header>
+    <div class="header-label">Patrón de Diseño</div>
+    <h1>Memento</h1>
+    <p class="header-subtitle">Guarda el estado sin romper el encapsulamiento</p>
+    <div class="accent-line"></div>
+  </header>
+
+  <main class="grid">
+
+    <section class="card card-1" id="problema">
+      <div class="card-number">01 El Problema</div>
+      <h2>¿Cómo guardar estado sin <span class="highlight">romper</span> el encapsulamiento?</h2>
+
+      <p>
+        Un editor de texto, un formulario largo o un juego permiten modificar el estado
+        de un objeto poco a poco. En algún momento el usuario se equivoca y quiere
+        volver atrás (<strong>Ctrl+Z</strong>).
+      </p>
+      <p>
+        El problema es <em>cómo</em> guardar ese estado anterior sin romper el
+        encapsulamiento del objeto. Si expones todos los campos internos para que
+        otra clase pueda "guardarlos y restaurarlos", cualquiera puede leer y modificar
+        el estado interno libremente — lo cual viola un principio fundamental de la OOP.
+      </p>
+
+      <div class="problem-highlight">
+        "Necesitas guardar una <strong>'foto'</strong> del estado sin que quien la guarda
+        sepa qué hay dentro de la foto."
+      </div>
+    </section>
+
+    <section class="card card-2" id="solucion">
+      <div class="card-number">02 ; La Solución</div>
+      <h2>Tres roles, una <span class="highlight">responsabilidad</span> cada uno</h2>
+
+      <p>Memento separa tres actores con responsabilidades claras y bien delimitadas:</p>
+
+      <ul class="roles-list">
+        <li>
+          <span class="role-tag role-originator">Originator</span>
+          El objeto cuyo estado cambia con el tiempo (editor, documento, personaje
+          del juego). Sabe crear un memento de sí mismo y restaurarse a partir de uno.
+        </li>
+        <li>
+          <span class="role-tag role-memento">Memento</span>
+          Objeto inmutable que guarda una copia del estado del Originator. Solo el
+          Originator puede leer su contenido; hacia afuera es una <em>caja negra</em>.
+        </li>
+        <li>
+          <span class="role-tag role-caretaker">Caretaker</span>
+          Guarda la lista de mementos (historial de undo/redo) pero nunca mira ni
+          modifica su contenido. Solo pide "guárdame este" y "dame el anterior".
+        </li>
+      </ul>
+
+      <div class="diagram-block">
+        <pre>
+ Originator           Memento          Caretaker
++-----------+     +------------+    +-------------+
+| -state    |---->| -state(prv)|<---| -history[]  |
+| +save()   |     +------------+    | +backup()   |
+| +restore()|                       | +undo()     |
++-----------+                       +-------------+</pre>
+      </div>
+    </section>
+
+    <section class="card card-3" id="codigo">
+      <div class="card-number">03 ; Código Mínimo</div>
+      <h2>Implementación en <span class="highlight">PHP</span></h2>
+
+      <div class="code-label code-label-bad"> Código Incorrecto  Rompe el encapsulamiento</div>
+      <div class="code-block code-bad">
+        <pre><span class="kw">class</span> <span class="fn">Memento</span> {
+  <span class="kw">public</span> <span class="ty">string</span> <span class="str">$state</span>;
+
+  <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="ty">string</span> <span class="str">$state</span>) {
+    <span class="str">$this</span>-><span class="str">state</span> = <span class="str">$state</span>;
+  }
+}
+
+<span class="kw">class</span> <span class="fn">History</span> {
+  <span class="kw">public function</span> <span class="fn">undo</span>(<span class="fn">Memento</span> <span class="str">$m</span>): <span class="ty">void</span> {
+    <span class="str">$rawState</span> = <span class="str">$m</span>-><span class="str">state</span>;
+    <span class="str">$m</span>-><span class="str">state</span> = <span class="str">"estado alterado"</span>;
+  }
+}</pre>
+      </div>
+
+      <div class="code-label code-label-good">&#10003; Código Correcto  Encapsulamiento respetado</div>
+      <div class="code-block code-good">
+        <pre><span class="kw">class</span> <span class="fn">Memento</span> {
+  <span class="kw">public function</span> <span class="fn">__construct</span>(
+    <span class="pm">private readonly</span> <span class="ty">string</span> <span class="str">$state</span>
+  ) {}
+
+  <span class="kw">public function</span> <span class="fn">getState</span>(): <span class="ty">string</span> {
+    <span class="kw">return</span> <span class="str">$this</span>-><span class="fn">state</span>;
+  }
+}
+
+<span class="kw">class</span> <span class="fn">Editor</span> {
+  <span class="pm">private</span> <span class="ty">string</span> <span class="str">$content</span> = <span class="str">""</span>;
+
+  <span class="kw">public function</span> <span class="fn">write</span>(<span class="ty">string</span> <span class="str">$text</span>): <span class="ty">void</span> {
+    <span class="str">$this</span>-><span class="str">content</span> .= <span class="str">$text</span>;
+  }
+  <span class="kw">public function</span> <span class="fn">save</span>(): <span class="fn">Memento</span> {
+    <span class="kw">return new</span> <span class="fn">Memento</span>(<span class="str">$this</span>-><span class="str">content</span>);
+  }
+  <span class="kw">public function</span> <span class="fn">restore</span>(<span class="fn">Memento</span> <span class="str">$m</span>): <span class="ty">void</span> {
+    <span class="str">$this</span>-><span class="str">content</span> = <span class="str">$m</span>-><span class="fn">getState</span>();
+  }
+}
+
+<span class="kw">class</span> <span class="fn">History</span> {
+  <span class="pm">private</span> <span class="ty">array</span> <span class="str">$stack</span> = [];
+
+  <span class="kw">public function</span> <span class="fn">backup</span>(<span class="fn">Editor</span> <span class="str">$e</span>): <span class="ty">void</span> {
+    <span class="str">$this</span>-><span class="str">stack</span>[] = <span class="str">$e</span>-><span class="fn">save</span>();
+  }
+  <span class="kw">public function</span> <span class="fn">undo</span>(<span class="fn">Editor</span> <span class="str">$e</span>): <span class="ty">void</span> {
+    <span class="str">$m</span> = <span class="fn">array_pop</span>(<span class="str">$this</span>-><span class="str">stack</span>);
+    <span class="kw">if</span> (<span class="str">$m</span>) <span class="str">$e</span>-><span class="fn">restore</span>(<span class="str">$m</span>);
+  }
+}</pre>
+      </div>
+    </section>
+
+    <section class="card card-4" id="cuando">
+      <div class="card-number">04  Cuándo Aplicarlo</div>
+      <h2>Úsalo bien o <span class="highlight">evítalo</span></h2>
+
+      <div class="when-grid">
+        <div class="when-col when-yes">
+          <div class="when-col-header">
+            <span class="icon-check">✔</span> Sí aplica
+          </div>
+          <ul>
+            <li>Necesitas undo/redo real — editores, dibujo, juegos.</li>
+            <li>Quieres puntos de restauración en una transacción.</li>
+            <li>El estado es relativamente pequeño o usas snapshots parciales.</li>
+          </ul>
+        </div>
+
+        <div class="when-col when-no">
+          <div class="when-col-header">
+            <span class="icon-x">✘</span> No aplica
+          </div>
+          <ul>
+            <li>El objeto no cambia de estado o nunca se necesita "volver atrás".</li>
+            <li>El estado es enorme — mejor usar Command con <em>deltas</em>.</li>
+            <li>Re-consultar la fuente de datos (BD) es suficiente.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card card-5" id="ejemplos">
+      <div class="card-number">05 Ejemplos Reales</div>
+      <h2>Memento en el <span class="highlight">mundo real</span> (verificables)</h2>
+
+      <div class="examples-grid">
+
+        <div class="example-card">
+          <span class="example-icon">☕</span>
+          <h3>Java Swing — javax.swing.undo</h3>
+          <p>
+            El paquete estándar de Java implementa esta idea directamente para el soporte
+            de undo/redo en componentes Swing. La interfaz <code>StateEditable</code>
+            permite que un objeto exponga su estado mediante <code>storeState()</code>
+            y <code>restoreState()</code>. La clase <code>StateEdit</code> actúa como el
+            "memento" que guarda ese estado para poder revertirlo.
+          </p>
+          <p>
+            Es documentación oficial de Java SE, fácil de citar y verificar en
+            <strong>docs.oracle.com</strong> bajo el paquete <code>javax.swing.undo</code>.
+          </p>
+          <span class="example-tag">Implementación formal</span>
+        </div>
+
+        <div class="example-card">
+          <span class="example-icon">🌿</span>
+          <h3>Git — Snapshots de repositorio</h3>
+          <p>
+            Los sistemas de control de versiones como Git guardan <em>snapshots</em>
+            completos del estado del repositorio en cada commit. Conceptualmente, cada
+            commit es un memento: preserva una "foto" del estado de todos los archivos
+            en ese momento, y el historial de commits actúa como el Caretaker que
+            guarda la colección de esos snapshots.
+          </p>
+          <p>
+            Git no usa las clases literales del patrón GoF, pero la analogía es
+            directa e ilustrativa del principio fundamental de Memento.
+          </p>
+          <span class="example-tag">Analogía conceptual</span>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Patrones de Diseño  <span>Memento</span>  ESEN  2025</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
